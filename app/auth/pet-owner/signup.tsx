@@ -1,8 +1,14 @@
 import { Colors } from "@/shared/colors/Colors";
-import { Ionicons } from "@expo/vector-icons"; // 👈 icon
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Signup = () => {
   const router = useRouter();
@@ -16,7 +22,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Pet Info
+  // Pet Info (for Pet Owner only)
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState("");
   const [breed, setBreed] = useState("");
@@ -26,22 +32,53 @@ const Signup = () => {
   const breedList = ["Labrador", "Bulldog", "Persian", "Siamese"];
 
   const handleNext = () => {
-    if (step < 3) {
-      setStep(step + 1);
-    } else {
-      // handle signup success → navigate to home
-      console.log("Signup Success", { userType, fullName, petName });
-      router.replace("/pet-owner/(tabs)/home");
+    if (userType === "Pet Owner") {
+      if (step < 3) {
+        setStep(step + 1);
+      } else {
+        console.log("Pet Owner Signup Success", {
+          userType,
+          fullName,
+          petName,
+        });
+        router.replace("/pet-owner/(tabs)/home");
+      }
+    } else if (userType === "Veterinarian" || userType === "Groomer") {
+      if (step < 2) {
+        setStep(step + 1);
+      } else {
+        console.log("Signup Success", { userType, fullName, email });
+        router.replace("/pet-owner/(tabs)/home");
+      }
     }
   };
 
   const handleBack = () => {
-    if (step > 1) {
-      setStep((prev) => prev - 1);
+    if (step === 1) {
+      router.replace("/StartScreen");
     } else {
-      router.back(); // go back to prev screen
+      setStep((prev) => prev - 1);
     }
   };
+
+  // Animated Step Indicator
+  const getSteps = () =>
+    userType === "Pet Owner" ? [1, 2, 3] : userType ? [1, 2] : [1];
+
+  const indicators = getSteps();
+  const animatedWidths = useRef(
+    [1, 2, 3].map(() => new Animated.Value(7))
+  ).current;
+
+  useEffect(() => {
+    indicators.forEach((s, i) => {
+      Animated.timing(animatedWidths[i], {
+        toValue: step === s ? 43 : 7,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [step, userType]);
 
   const StepIndicator = () => (
     <View
@@ -51,11 +88,11 @@ const Signup = () => {
         marginBottom: 20,
       }}
     >
-      {[1, 2, 3].map((s) => (
-        <View
+      {indicators.map((s, i) => (
+        <Animated.View
           key={s}
           style={{
-            width: step === s ? 43 : 7,
+            width: animatedWidths[i],
             height: 7,
             borderRadius: 10,
             marginHorizontal: 5,
@@ -68,16 +105,20 @@ const Signup = () => {
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      {/* 👈 Visible Back Icon */}
-      <TouchableOpacity onPress={handleBack} style={{ marginBottom: 10 }}>
-        <Ionicons name="arrow-back" size={24} color="black" />
+      {/* Back Icon */}
+      <TouchableOpacity
+        onPress={handleBack}
+        style={{ marginBottom: 10, marginTop: 30 }}
+      >
+        <MaterialIcons name="arrow-back-ios" size={24} color="black" />
       </TouchableOpacity>
 
       <StepIndicator />
 
+      {/* Step 1: Choose User Type */}
       {step === 1 && (
         <View style={{ flex: 1, justifyContent: "center" }}>
-          <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 10 }}>
             Select User Type
           </Text>
           {["Pet Owner", "Veterinarian", "Groomer"].map((type) => (
@@ -94,8 +135,7 @@ const Signup = () => {
                 if (type === "Pet Owner") {
                   setStep(2);
                 } else {
-                  console.log(type, "signup complete");
-                  router.replace("/pet-owner/(tabs)/home");
+                  setStep(2); // Vet & Groomer go to credentials step
                 }
               }}
             >
@@ -112,7 +152,8 @@ const Signup = () => {
         </View>
       )}
 
-      {step === 2 && (
+      {/* Step 2: Pet Owner Credentials */}
+      {step === 2 && userType === "Pet Owner" && (
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 20 }}>
             Enter Your Credentials
@@ -156,7 +197,8 @@ const Signup = () => {
         </View>
       )}
 
-      {step === 3 && (
+      {/* Step 3: Pet Owner Pet Info */}
+      {step === 3 && userType === "Pet Owner" && (
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 20 }}>
             Add Pet Information
@@ -206,6 +248,45 @@ const Signup = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Step 2 for Vet or Groomer */}
+      {step === 2 &&
+        (userType === "Veterinarian" || userType === "Groomer") && (
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 20 }}>
+              {userType} Signup
+            </Text>
+            <TextInput
+              placeholder="Full Name"
+              value={fullName}
+              onChangeText={setFullName}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Phone Number"
+              value={phone}
+              onChangeText={setPhone}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Password"
+              value={password}
+              secureTextEntry
+              onChangeText={setPassword}
+              style={styles.input}
+            />
+
+            <TouchableOpacity style={styles.button} onPress={handleNext}>
+              <Text style={{ color: "#fff", textAlign: "center" }}>Finish</Text>
+            </TouchableOpacity>
+          </View>
+        )}
     </View>
   );
 };

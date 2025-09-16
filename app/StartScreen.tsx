@@ -36,7 +36,7 @@ const StartScreen = () => {
           width: "100%",
         }}
       >
-        <Link href="/auth/pet-owner/signup" asChild>
+        <Link href="/auth/Signup" asChild>
           <Pressable style={styles.buttonContainer}>
             <Text style={styles.buttonText}>Create account</Text>
           </Pressable>

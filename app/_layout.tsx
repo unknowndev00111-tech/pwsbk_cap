@@ -63,6 +63,24 @@ function NavigationRoot() {
         name="auth/pet-owner/signup"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="auth/groomer/signup"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="auth/Signup" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="component/UserComponent/PetOwnerSignup"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="component/UserComponent/VetSignup"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="component/UserComponent/GroomerSignup"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="auth/vet/signup" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );
