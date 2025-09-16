@@ -8,7 +8,7 @@ export default function LoaderScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/pet-owner/(tabs)/home"); // Navigate to start screen
+      router.replace("/StartScreen"); // Navigate to start screen
     }, 800); // 2.5s delay
 
     return () => clearTimeout(timer);

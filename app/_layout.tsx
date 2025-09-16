@@ -59,6 +59,10 @@ function NavigationRoot() {
       <Stack.Screen name="pet-owner/(tabs)/chat" />
       <Stack.Screen name="pet-owner/(tabs)/post" />
       <Stack.Screen name="pet-owner/(tabs)/profile" />
+      <Stack.Screen
+        name="auth/pet-owner/signup"
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );
