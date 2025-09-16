@@ -1,24 +1,65 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+// app/_layout.tsx
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import Splash from "../components/screen/SplashScreen";
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+// Prevent auto-hide until we're ready
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [loaded] = useFonts({
+    Sans: require("../assets/fonts/InriaSans-Regular.ttf"),
+    SansBold: require("../assets/fonts/InriaSans-Bold.ttf"),
+    Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
+    RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
+    RobotoSemiBold: require("../assets/fonts/Roboto-SemiBold.ttf"),
+  });
+
   const colorScheme = useColorScheme();
+  const [appReady, setAppReady] = useState(false);
+
+  useEffect(() => {
+    const prepareApp = async () => {
+      if (loaded) {
+        await SplashScreen.hideAsync();
+        // keep splash visible for a moment
+        setTimeout(() => setAppReady(true), 800);
+      }
+    };
+    prepareApp();
+  }, [loaded]);
+
+  if (!appReady) {
+    return <Splash />;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <NavigationRoot />
     </ThemeProvider>
+  );
+}
+
+function NavigationRoot() {
+  return (
+    <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+      <Stack.Screen name="StartScreen" />
+      <Stack.Screen name="pet-owner/(tabs)/home" />
+      <Stack.Screen name="pet-owner/(tabs)/martket-place" />
+      <Stack.Screen name="pet-owner/(tabs)/chat" />
+      <Stack.Screen name="pet-owner/(tabs)/post" />
+      <Stack.Screen name="pet-owner/(tabs)/profile" />
+      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+    </Stack>
   );
 }
