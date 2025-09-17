@@ -1,17 +1,18 @@
 import { Colors } from "@/shared/colors/Colors";
 import { FontAwesome5, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
 import {
   Animated,
   Easing,
-  FlatList,
+  Image,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -40,6 +41,14 @@ interface PetOwnerSignupProps {
   breedList: string[];
   onNext: () => void;
 }
+
+type Pet = {
+  name: string;
+  species: string;
+  breed: string;
+  age: string;
+  image: string | null; // allow string OR null
+};
 
 const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
   step,
@@ -72,8 +81,10 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
   // Separate animations for each modal
   const speciesAnim = useRef(new Animated.Value(300)).current;
   const breedAnim = useRef(new Animated.Value(300)).current;
-
-  const openModal = (setter: any, anim: any) => {
+  const [pets, setPets] = useState<Pet[]>([
+    { name: "", species: "", breed: "", age: "", image: null },
+  ]);
+  const openModal = (setter: any, anim: any, index: number) => {
     setter(true);
     setTimeout(() => {
       Animated.timing(anim, {
@@ -244,111 +255,241 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
   if (step === 3) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Add Pet Information</Text>
+        <Text style={[styles.title, { fontSize: 20 }]}>
+          You can add one or more pets to your account.
+        </Text>
+        <Text style={[styles.subTitle, { fontSize: 14 }]}>
+          Please provide the following details
+        </Text>
 
-        <TextInput
-          placeholder="Pet Name"
-          value={petName}
-          onChangeText={setPetName}
-          style={styles.input}
-        />
-
-        {/* Species Dropdown */}
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => openModal(setSpeciesModal, speciesAnim)}
+        <ScrollView
+          style={{ flex: 1, backgroundColor: "#fff" }}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
         >
-          <Text>{species || "Select Species"}</Text>
-        </TouchableOpacity>
-
-        {/* Breed Dropdown */}
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => openModal(setBreedModal, breedAnim)}
-        >
-          <Text>{breed || "Select Breed"}</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          placeholder="Age"
-          value={age}
-          onChangeText={setAge}
-          style={styles.input}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={onNext}>
-          <Text style={styles.buttonText}>Finish</Text>
-        </TouchableOpacity>
-
-        {/* Species Modal */}
-        <Modal transparent visible={speciesModal} animationType="fade">
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                { transform: [{ translateY: speciesAnim }] },
-              ]}
+          {pets.map((pet, index) => (
+            <View
+              key={index}
+              style={{
+                borderRadius: 12,
+                marginBottom: 40,
+              }}
             >
-              <Text style={styles.modalTitle}>Select Species</Text>
-              <FlatList
-                data={speciesList}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.modalItem}
-                    onPress={() => {
-                      setSpecies(item);
-                      closeModal(setSpeciesModal, speciesAnim);
+              {/* Pet Image Picker */}
+              <TouchableOpacity
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 10,
+                }}
+                onPress={async () => {
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 0.8,
+                  });
+
+                  if (!result.canceled) {
+                    const updatedPets = [...pets];
+                    updatedPets[index].image = result.assets[0].uri;
+                    setPets(updatedPets);
+                  }
+                }}
+              >
+                {pet.image ? (
+                  <Image
+                    source={{ uri: pet.image }}
+                    style={{ width: 80, height: 80, borderRadius: 40 }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 40,
+                      backgroundColor: "#eee",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    <Text>{item}</Text>
-                  </TouchableOpacity>
+                    <FontAwesome5 name="camera" size={24} color="#999" />
+                  </View>
                 )}
-              />
-              <TouchableOpacity
-                style={[styles.button, { marginTop: 10 }]}
-                onPress={() => closeModal(setSpeciesModal, speciesAnim)}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
 
-        {/* Breed Modal */}
-        <Modal transparent visible={breedModal} animationType="fade">
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                { transform: [{ translateY: breedAnim }] },
-              ]}
-            >
-              <Text style={styles.modalTitle}>Select Breed</Text>
-              <FlatList
-                data={breedList}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
+              {/* Pet Name */}
+              <View style={{ flexDirection: "column", gap: 5 }}>
+                <Text style={styles.label}>Pet Name</Text>
+                <View style={styles.inputContainer}>
+                  <FontAwesome5
+                    name="user-alt"
+                    size={20}
+                    color={Colors.primary}
+                  />
+                  <TextInput
+                    placeholder="Pet Name"
+                    value={pet.name}
+                    onChangeText={(text) => {
+                      const updatedPets = [...pets];
+                      updatedPets[index].name = text;
+                      setPets(updatedPets);
+                    }}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+
+              {/* Species Dropdown */}
+              <View style={{ flexDirection: "column", gap: 5 }}>
+                <Text style={styles.label}>Species</Text>
+                <View style={styles.inputContainer}>
+                  <FontAwesome5 name="paw" size={20} color={Colors.primary} />
                   <TouchableOpacity
-                    style={styles.modalItem}
+                    style={styles.dropdown}
+                    onPress={() =>
+                      openModal(setSpeciesModal, speciesAnim, index)
+                    }
+                  >
+                    <Text style={{ color: pet.species ? "#000" : "#C3C0C0" }}>
+                      {pet.species || "Select Species"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Breed Dropdown */}
+              <View style={{ flexDirection: "column", gap: 5 }}>
+                <Text style={styles.label}>Breed</Text>
+                <View style={styles.inputContainer}>
+                  <FontAwesome5 name="dog" size={20} color={Colors.primary} />
+                  <TouchableOpacity
+                    style={styles.dropdown}
+                    onPress={() => openModal(setBreedModal, breedAnim, index)}
+                  >
+                    <Text style={{ color: pet.breed ? "#000" : "#C3C0C0" }}>
+                      {pet.breed || "Select Breed"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Age */}
+              <View style={{ flexDirection: "column", gap: 5 }}>
+                <Text style={styles.label}>Age</Text>
+                <View style={styles.inputContainer}>
+                  <FontAwesome5
+                    name="calendar"
+                    size={20}
+                    color={Colors.primary}
+                  />
+                  <TextInput
+                    placeholder="Age"
+                    value={pet.age}
+                    onChangeText={(text) => {
+                      const updatedPets = [...pets];
+                      updatedPets[index].age = text;
+                      setPets(updatedPets);
+                    }}
+                    keyboardType="numeric"
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+
+              {/* Add + Delete Buttons Row */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  marginHorizontal: 20,
+                  marginTop: 10,
+                }}
+              >
+                {/* Add Button */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#f0f0f0",
+                    flex: 1,
+                    height: 40,
+                    borderRadius: 19,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    if (pets.length >= 3) {
+                      ToastAndroid.show(
+                        "You can only add up to 3 pets.",
+                        ToastAndroid.SHORT
+                      );
+                      return;
+                    }
+                    setPets([
+                      ...pets,
+                      {
+                        name: "",
+                        species: "",
+                        breed: "",
+                        age: "",
+                        image: null,
+                      },
+                    ]);
+                  }}
+                >
+                  <Text style={{ color: Colors.primary, textAlign: "center" }}>
+                    + Add Another Pet
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Delete Button */}
+                {pets.length > 1 && (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#ffcccc",
+                      width: "40%",
+                      height: 40,
+                      borderRadius: 19,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                     onPress={() => {
-                      setBreed(item);
-                      closeModal(setBreedModal, breedAnim);
+                      const updatedPets = pets.filter((_, i) => i !== index);
+                      setPets(updatedPets);
+                      ToastAndroid.show(
+                        "Pet removed successfully.",
+                        ToastAndroid.SHORT
+                      );
                     }}
                   >
-                    <Text>{item}</Text>
+                    <Text style={{ color: "red", textAlign: "center" }}>
+                      Delete
+                    </Text>
                   </TouchableOpacity>
                 )}
-              />
-              <TouchableOpacity
-                style={[styles.button, { marginTop: 10 }]}
-                onPress={() => closeModal(setBreedModal, breedAnim)}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Add Pet Button */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            width: "100%",
+            backgroundColor: "#fff",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* Finish Button */}
+          <TouchableOpacity
+            style={[styles.button, { marginBottom: 40 }]}
+            onPress={onNext}
+          >
+            <Text style={styles.buttonText}>Finish</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -400,14 +541,15 @@ const styles = StyleSheet.create({
     padding: 10,
     width: "80%",
     fontFamily: "Roboto",
-    color: "#000",
+    color: "#C3C0C0",
   },
   dropdown: {
-    borderWidth: 1,
-    borderColor: "#ccc",
+    // borderWidth: 1,
+    // borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 10,
+    // marginBottom: 10,
+    width: "80%",
   },
   button: {
     backgroundColor: Colors.primary,
@@ -444,6 +586,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+  },
+  modalButton: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 25,
+    marginTop: 10,
   },
 });
 
