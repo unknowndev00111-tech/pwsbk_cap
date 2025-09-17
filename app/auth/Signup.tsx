@@ -6,7 +6,13 @@ import { Colors } from "@/shared/colors/Colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Signup = () => {
   const router = useRouter();
@@ -71,11 +77,11 @@ const Signup = () => {
   const steps = userType === "Pet Owner" ? [1, 2, 3] : userType ? [1, 2] : [1];
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Back Button */}
       <TouchableOpacity
         onPress={handleBack}
-        style={{ marginBottom: 10, marginTop: 30 }}
+        style={{ marginBottom: 10, marginTop: 55, marginLeft: 20 }}
       >
         <MaterialIcons name="arrow-back-ios" size={24} color="black" />
       </TouchableOpacity>
@@ -84,43 +90,122 @@ const Signup = () => {
 
       {/* Step 1: User Type Selection */}
       {step === 1 && (
-        <View style={{ flex: 1, justifyContent: "center" }}>
+        <View style={{ flex: 1, backgroundColor: "#fff" }}>
           <Text
             style={{
               fontSize: 20,
               fontFamily: "RobotoMedium",
-              maxWidth: "75%",
+              maxWidth: "65%",
               alignSelf: "flex-start",
               textAlign: "left",
               marginBottom: 20,
+              marginLeft: 20,
             }}
           >
             Welcome! To get started, tell us who you are.
           </Text>
-          {["Pet Owner", "Veterinarian", "Groomer"].map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={{
-                padding: 15,
-                backgroundColor: userType === type ? Colors.primary : "#eee",
-                borderRadius: 10,
-                marginBottom: 10,
-              }}
-              onPress={() => {
-                setUserType(type);
-                setStep(2);
-              }}
-            >
-              <Text
+
+          <Text
+            style={{
+              fontSize: 14,
+              marginBottom: 30,
+              fontFamily: "Roboto",
+              marginLeft: 20,
+            }}
+          >
+            Choose the option that best describes you
+          </Text>
+
+          {/* Row for Pet Owner + Veterinarian */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginHorizontal: 20,
+            }}
+          >
+            {["Pet Owner", "Veterinarian"].map((type) => (
+              <TouchableOpacity
+                key={type}
                 style={{
-                  textAlign: "center",
-                  color: userType === type ? "#fff" : "#000",
+                  flex: 1,
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: Colors.primary,
+                  backgroundColor: userType === type ? Colors.primary : "#fff",
+                  borderRadius: 20,
+                  marginBottom: 10,
+                  marginRight: type === "Pet Owner" ? 10 : 0, // spacing between buttons
+                }}
+                onPress={() => {
+                  setUserType(type);
                 }}
               >
-                {type}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: "RobotoMedium",
+                    color: userType === type ? "#fff" : Colors.primary,
+                  }}
+                >
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Groomer in its own column */}
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              borderWidth: 1,
+              width: "45%",
+              borderColor: Colors.primary,
+              backgroundColor: userType === "Groomer" ? Colors.primary : "#fff",
+              borderRadius: 20,
+              marginBottom: 10,
+              marginTop: 10,
+              marginLeft: "10%",
+            }}
+            onPress={() => {
+              setUserType("Groomer");
+            }}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                fontFamily: "RobotoMedium",
+                color: userType === "Groomer" ? "#fff" : Colors.primary,
+              }}
+            >
+              Groomer
+            </Text>
+          </TouchableOpacity>
+
+          <Pressable
+            style={{
+              backgroundColor: Colors.primary,
+              padding: 15,
+              borderRadius: 25,
+              position: "absolute",
+              bottom: 30,
+              width: "85%",
+              marginTop: 10,
+              alignSelf: "center",
+            }}
+            onPress={() => {
+              if (!userType) {
+                ToastAndroid.show(
+                  "Please select a user type first.",
+                  ToastAndroid.SHORT
+                );
+                return;
+              }
+              setStep(2);
+            }}
+          >
+            <Text style={{ color: "#fff", textAlign: "center" }}>Next</Text>
+          </Pressable>
         </View>
       )}
 

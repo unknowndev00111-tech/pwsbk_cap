@@ -1,10 +1,14 @@
 import { Colors } from "@/shared/colors/Colors";
+import { FontAwesome5, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import {
   Animated,
   Easing,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -63,7 +67,8 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
 }) => {
   const [speciesModal, setSpeciesModal] = useState(false);
   const [breedModal, setBreedModal] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // Separate animations for each modal
   const speciesAnim = useRef(new Animated.Value(300)).current;
   const breedAnim = useRef(new Animated.Value(300)).current;
@@ -75,7 +80,7 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
         toValue: 0,
         duration: 250,
         easing: Easing.out(Easing.ease),
-        useNativeDriver: false, // 👈 force JS driver
+        useNativeDriver: false,
       }).start();
     }, 50);
   };
@@ -88,50 +93,151 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
       toValue: 300,
       duration: 200,
       easing: Easing.in(Easing.ease),
-      useNativeDriver: false, // 👈 force JS driver
+      useNativeDriver: false,
     }).start(() => setter(false));
   };
 
   if (step === 2) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Enter Your Credentials</Text>
-        <TextInput
-          placeholder="Full Name"
-          value={fullName}
-          onChangeText={setFullName}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Phone Number"
-          value={phone}
-          onChangeText={setPhone}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          secureTextEntry
-          onChangeText={setPassword}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          secureTextEntry
-          onChangeText={setConfirmPassword}
-          style={styles.input}
-        />
-        <TouchableOpacity style={styles.button} onPress={onNext}>
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.container}>
+            <Text style={styles.title}>
+              Let’s set up your account so you can easily manage your pets.{" "}
+            </Text>
+            <Text style={styles.subTitle}>
+              Please provide the following details
+            </Text>
+            <View style={{ flexDirection: "column", gap: 5 }}>
+              <Text style={styles.label}>Full Name</Text>
+              <View style={styles.inputContainer}>
+                <FontAwesome5
+                  name="user-alt"
+                  size={20}
+                  color={Colors.primary}
+                />
+                <TextInput
+                  placeholder="Full Name"
+                  value={fullName}
+                  onChangeText={setFullName}
+                  style={styles.input}
+                />
+              </View>
+            </View>
+            <View style={{ flexDirection: "column", gap: 5 }}>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={styles.inputContainer}>
+                <FontAwesome6 name="phone" size={20} color={Colors.primary} />
+                <TextInput
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChangeText={setPhone}
+                  style={styles.input}
+                />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "column", gap: 5 }}>
+              <Text style={styles.label}>Email</Text>
+              <View style={styles.inputContainer}>
+                <MaterialIcons name="email" size={20} color={Colors.primary} />
+                <TextInput
+                  placeholder="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.input}
+                />
+              </View>
+            </View>
+
+            {/* Password */}
+            <View style={{ flexDirection: "column", gap: 5 }}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputContainer}>
+                <FontAwesome5
+                  name="lock"
+                  size={20}
+                  color={Colors.primary}
+                  marginLeft={25}
+                />
+
+                <TextInput
+                  placeholder="Password"
+                  value={password}
+                  secureTextEntry={!showPassword}
+                  onChangeText={setPassword}
+                  style={[styles.input, { flex: 1 }]}
+                />
+
+                <TouchableOpacity
+                  disabled={password.length === 0}
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  style={{ padding: 5 }}
+                >
+                  {password.length > 0 ? (
+                    <FontAwesome5
+                      name={showPassword ? "eye-slash" : "eye"}
+                      size={15}
+                      color="#ccc"
+                      marginRight={10}
+                    />
+                  ) : (
+                    <View style={{ width: 15 }} /> // placeholder keeps layout stable
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Confirm Password */}
+            <View style={{ flexDirection: "column", gap: 5 }}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <View style={styles.inputContainer}>
+                <FontAwesome6
+                  name="lock"
+                  size={20}
+                  color={Colors.primary}
+                  marginLeft={25}
+                />
+
+                <TextInput
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={[styles.input, { flex: 1 }]}
+                />
+
+                <TouchableOpacity
+                  disabled={confirmPassword.length === 0}
+                  onPress={() => setShowConfirmPassword((prev) => !prev)}
+                  style={{ padding: 5 }}
+                >
+                  {confirmPassword.length > 0 ? (
+                    <FontAwesome5
+                      name={showConfirmPassword ? "eye-slash" : "eye"}
+                      size={15}
+                      marginRight={10}
+                      color="#ccc"
+                    />
+                  ) : (
+                    <View style={{ width: 15 }} /> // placeholder keeps layout stable
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={onNext}>
+              <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -139,6 +245,7 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Add Pet Information</Text>
+
         <TextInput
           placeholder="Pet Name"
           value={petName}
@@ -252,19 +359,48 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
   },
   title: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 17,
+    fontFamily: "RobotoMedium",
     marginBottom: 20,
+    maxWidth: "100%",
+    marginHorizontal: 20,
+  },
+  subTitle: {
+    fontSize: 14,
+    fontFamily: "Roboto",
+    marginBottom: 30,
+    maxWidth: "100%",
+    marginHorizontal: 20,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    gap: 10,
+    backgroundColor: "white",
+    borderWidth: 1.3,
+    borderColor: Colors.primary,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    width: "90%",
+    height: 50,
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 14,
+    fontFamily: "Roboto",
+    color: "#000",
+    marginLeft: 30,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 10,
+    width: "80%",
+    fontFamily: "Roboto",
+    color: "#000",
   },
   dropdown: {
     borderWidth: 1,
@@ -276,9 +412,13 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.primary,
     padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
+    borderRadius: 25,
+    marginTop: 20,
+    top: "10%",
+    width: "85%",
+    alignSelf: "center",
   },
+
   buttonText: {
     color: "#fff",
     textAlign: "center",

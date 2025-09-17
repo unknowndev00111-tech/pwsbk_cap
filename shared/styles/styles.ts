@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { Colors } from "../colors/Colors";
 
 export const screens = StyleSheet.create({
   screen: {
@@ -13,4 +14,15 @@ export const ShadowStyle = {
   shadowOpacity: 0.16, // 16%
   shadowRadius: 4.5, // blur = 9 → radius ≈ 4.5
   elevation: 4,
+};
+
+export const ButtonStyle = {
+  button: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 25,
+    position: "absolute",
+    bottom: 20,
+    marginTop: 10,
+  },
 };
