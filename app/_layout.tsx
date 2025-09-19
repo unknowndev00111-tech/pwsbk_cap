@@ -23,6 +23,7 @@ export default function RootLayout() {
     Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
     RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
     RobotoSemiBold: require("../assets/fonts/Roboto-SemiBold.ttf"),
+    RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"),
   });
 
   const colorScheme = useColorScheme();
@@ -41,7 +42,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appReady) {
-      router.replace("/pet-owner/(tabs)/home"); // replace so user can't go back to splash
+      router.replace("/pet-owner/notifications"); // replace so user can't go back to splash
     }
   }, [appReady]);
 
@@ -61,6 +62,8 @@ function NavigationRoot() {
     <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
       <Stack.Screen name="StartScreen" />
       <Stack.Screen name="pet-owner/(tabs)" />
+      <Stack.Screen name="pet-owner/(home)" />
+      <Stack.Screen name="usable" />
       {/* <Stack.Screen name="pet-owner/(tabs)/martket-place" />
       <Stack.Screen name="pet-owner/(tabs)/chat" />
       <Stack.Screen name="pet-owner/(tabs)/post" />

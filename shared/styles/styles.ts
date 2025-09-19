@@ -26,3 +26,11 @@ export const ButtonStyle = {
     marginTop: 10,
   },
 };
+
+export const HeaderTitleStyle = StyleSheet.create({
+  title: {
+    fontSize: 20,
+    fontFamily: "RobotoSemiBold",
+    color: "black",
+  },
+});

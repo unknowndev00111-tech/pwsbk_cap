@@ -19,8 +19,8 @@ export default function TabLayout() {
     <Image
       source={focused ? activeIcon : inactiveIcon}
       style={{
-        width: 28,
-        height: 28,
+        width: 30,
+        height: 30,
         tintColor: focused ? Colors.primary : "#C3C0C0", // 👈 active/inactive colors
         marginTop: 10,
       }}
@@ -67,20 +67,20 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) =>
             renderIcon(
               focused,
-              require("../../../assets/Icons/market-fill.png"),
-              require("../../../assets/Icons/market-outline.png")
+              require("../../../assets/Icons/store-fill.png"),
+              require("../../../assets/Icons/store-outline.png")
             ),
         }}
       />
       <Tabs.Screen
-        name="post"
+        name="add-friend"
         options={{
           title: "Post",
           tabBarIcon: ({ focused }) =>
             renderIcon(
               focused,
-              require("../../../assets/Icons/post-fill.png"),
-              require("../../../assets/Icons/post-outline.png")
+              require("../../../assets/Icons/friend-fill.png"),
+              require("../../../assets/Icons/friend-outline.png")
             ),
         }}
       />

@@ -2,11 +2,18 @@ import { Colors } from "@/shared/colors/Colors";
 import HeaderLayout from "@/shared/components/MainHeaderLayout";
 import SkeletonPost from "@/shared/components/SkeletalLoader";
 import { screens } from "@/shared/styles/styles";
-import { Feather, FontAwesome, Ionicons, Octicons } from "@expo/vector-icons";
+import {
+  Feather,
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+} from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -49,7 +56,6 @@ const initialPosts: Post[] = [
       "https://picsum.photos/301/200",
       "https://picsum.photos/302/200",
     ],
-
     liked: false,
     likesCount: 2,
     comments: [
@@ -68,9 +74,18 @@ const Home = () => {
   const [post, setPost] = useState("");
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [refreshing, setRefreshing] = useState(false);
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>(
     {}
   );
+
+  const onRefresh = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setPosts(initialPosts);
+      setLoading(false);
+    }, 2000);
+  };
 
   useEffect(() => {
     // Simulate fetching
@@ -254,9 +269,16 @@ const Home = () => {
     <View style={[screens.screen, { backgroundColor: Colors.background }]}>
       <HeaderLayout withLogo noBorderRadius>
         <View style={styles.iconWrapper}>
-          <FontAwesome name="plus-square-o" size={24} color="black" />
-          <Feather name="bell" size={24} color="black" />
-          <Feather name="search" size={24} color="black" />
+          <Pressable onPress={() => router.push("/pet-owner/post")}>
+            <FontAwesome name="plus-square-o" size={24} color="black" />
+          </Pressable>
+
+          <Pressable onPress={() => router.push("/pet-owner/notifications")}>
+            <Feather name="bell" size={24} color="black" />
+          </Pressable>
+          <Pressable onPress={() => router.push("/pet-owner/search")}>
+            <Feather name="search" size={24} color="black" />
+          </Pressable>
         </View>
       </HeaderLayout>
 
@@ -268,25 +290,30 @@ const Home = () => {
             placeholder="What's on your mind?"
             value={post}
             onChangeText={setPost}
+            onPress={() => router.push("/pet-owner/post")}
             style={styles.input}
           />
         </View>
-        <View
+        {/* <View
           style={{
             flexDirection: "row",
             gap: 15,
             alignSelf: "flex-start",
+            alignItems: "center",
+            // justifyContent: "center",
             marginLeft: 50,
             marginTop: 10,
+            width: "100%",
           }}
         >
           <FontAwesome name="image" size={17} color="#26BC00" />
           <Octicons name="video" size={17} color="#E00101" />
-        </View>
-
-        <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-          <Text style={{ color: Colors.white, textAlign: "center" }}>Post</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+            <Text style={{ color: Colors.white, textAlign: "center" }}>
+              Post
+            </Text>
+          </TouchableOpacity>
+        </View> */}
       </View>
 
       {/* Post list */}
@@ -301,7 +328,25 @@ const Home = () => {
           data={posts}
           keyExtractor={(item) => item.id}
           renderItem={renderPost}
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: 80, flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={() => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                marginTop: 50,
+                flexDirection: "column",
+              }}
+            >
+              <FontAwesome5 name="pager" size={20} color="gray" />
+              <Text style={{ color: "gray", fontSize: 12 }}>
+                No posts yet. Be the first to share something!
+              </Text>
+            </View>
+          )}
         />
       )}
     </View>
@@ -318,11 +363,10 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   postInputContainer: {
-    width: "95%",
+    width: "100%",
     backgroundColor: Colors.white,
     padding: 10,
     borderRadius: 10,
-    marginTop: 5,
     alignSelf: "center",
   },
   profileImage: {
@@ -335,8 +379,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Roboto",
     color: "#808080",
-    borderBottomColor: "#C3C0C0",
-    borderBottomWidth: 0.6,
     width: "85%",
     paddingVertical: 4,
   },
@@ -345,8 +387,9 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 15,
     width: "25%",
-    alignSelf: "flex-end",
-    marginTop: 10,
+    position: "absolute",
+    right: 0,
+    marginRight: 50,
   },
   postCard: {
     backgroundColor: Colors.white,
