@@ -1,6 +1,6 @@
 import { Colors } from "@/shared/colors/Colors";
 import { screens } from "@/shared/styles/styles";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -41,11 +41,15 @@ const StartScreen = () => {
             <Text style={styles.buttonText}>Create account</Text>
           </Pressable>
         </Link>
+
         <Pressable
           style={[
             styles.buttonContainer,
             { backgroundColor: Colors.buttonlogin },
           ]}
+          onPress={() => {
+            router.push("/auth/Login");
+          }}
         >
           <Text style={[styles.buttonText, { color: Colors.black }]}>
             Login

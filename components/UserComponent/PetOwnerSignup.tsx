@@ -480,11 +480,30 @@ const PetOwnerSignup: React.FC<PetOwnerSignupProps> = ({
             backgroundColor: "#fff",
             justifyContent: "center",
             alignItems: "center",
+            flexDirection: "row",
+            gap: 15,
+            paddingVertical: 30,
           }}
         >
+          {/* Skip Button */}
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                backgroundColor: "#E9E9E9",
+                width: "40%",
+                marginTop: 0,
+                top: 0,
+              },
+            ]}
+            onPress={onNext}
+          >
+            <Text style={[styles.buttonText, { color: "#000" }]}>Skip</Text>
+          </TouchableOpacity>
+
           {/* Finish Button */}
           <TouchableOpacity
-            style={[styles.button, { marginBottom: 40 }]}
+            style={[styles.button, { width: "40%", marginTop: 0, top: 0 }]}
             onPress={onNext}
           >
             <Text style={styles.buttonText}>Finish</Text>

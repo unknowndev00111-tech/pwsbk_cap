@@ -46,7 +46,7 @@ const Signup = () => {
 
   const handleBack = () => {
     if (step === 1) {
-      router.replace("/StartScreen");
+      router.back();
     } else {
       setStep((prev) => prev - 1);
     }

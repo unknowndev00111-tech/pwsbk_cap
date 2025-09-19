@@ -41,7 +41,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appReady) {
-      router.replace("/auth/Signup"); // replace so user can't go back to splash
+      router.replace("/pet-owner/(tabs)/home"); // replace so user can't go back to splash
     }
   }, [appReady]);
 
@@ -60,21 +60,14 @@ function NavigationRoot() {
   return (
     <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
       <Stack.Screen name="StartScreen" />
-      <Stack.Screen name="pet-owner/(tabs)/home" />
-      <Stack.Screen name="pet-owner/(tabs)/martket-place" />
+      <Stack.Screen name="pet-owner/(tabs)" />
+      {/* <Stack.Screen name="pet-owner/(tabs)/martket-place" />
       <Stack.Screen name="pet-owner/(tabs)/chat" />
       <Stack.Screen name="pet-owner/(tabs)/post" />
-      <Stack.Screen name="pet-owner/(tabs)/profile" />
-      <Stack.Screen
-        name="auth/pet-owner/signup"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="auth/groomer/signup"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="auth/Signup" options={{ headerShown: false }} />
-      <Stack.Screen
+      <Stack.Screen name="pet-owner/(tabs)/profile" /> */}
+
+      <Stack.Screen name="auth" options={{ headerShown: false }} />
+      {/* <Stack.Screen
         name="component/UserComponent/PetOwnerSignup"
         options={{ headerShown: false }}
       />
@@ -85,8 +78,8 @@ function NavigationRoot() {
       <Stack.Screen
         name="component/UserComponent/GroomerSignup"
         options={{ headerShown: false }}
-      />
-      <Stack.Screen name="auth/vet/signup" options={{ headerShown: false }} />
+      /> */}
+
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );
