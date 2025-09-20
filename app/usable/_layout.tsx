@@ -6,6 +6,7 @@ export default function Layout() {
     <>
       <Stack>
         <Stack.Screen name="user-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="pet-list" options={{ headerShown: false }} />
       </Stack>
     </>
   );

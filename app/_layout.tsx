@@ -42,7 +42,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appReady) {
-      router.replace("/pet-owner/notifications"); // replace so user can't go back to splash
+      router.replace("/pet-owner/post"); // replace so user can't go back to splash
     }
   }, [appReady]);
 
@@ -64,24 +64,8 @@ function NavigationRoot() {
       <Stack.Screen name="pet-owner/(tabs)" />
       <Stack.Screen name="pet-owner/(home)" />
       <Stack.Screen name="usable" />
-      {/* <Stack.Screen name="pet-owner/(tabs)/martket-place" />
-      <Stack.Screen name="pet-owner/(tabs)/chat" />
-      <Stack.Screen name="pet-owner/(tabs)/post" />
-      <Stack.Screen name="pet-owner/(tabs)/profile" /> */}
 
       <Stack.Screen name="auth" options={{ headerShown: false }} />
-      {/* <Stack.Screen
-        name="component/UserComponent/PetOwnerSignup"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="component/UserComponent/VetSignup"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="component/UserComponent/GroomerSignup"
-        options={{ headerShown: false }}
-      /> */}
 
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>

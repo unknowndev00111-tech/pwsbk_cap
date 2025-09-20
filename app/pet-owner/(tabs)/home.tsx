@@ -8,13 +8,14 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Image,
+  Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -40,9 +41,10 @@ type Post = {
   likesCount: number;
   comments: Comment[];
   showComments: boolean;
+  taggedPets?: { id: string; name: string; image?: string }[]; // ✅ new
 };
 
-const myProfileImage = "https://i.pravatar.cc/100?img=10"; // ✅ your profile pic
+const myProfileImage = "https://i.pravatar.cc/100?img=10";
 
 const initialPosts: Post[] = [
   {
@@ -67,14 +69,24 @@ const initialPosts: Post[] = [
       },
     ],
     showComments: false,
+    taggedPets: [
+      { id: "p1", name: "Buddy", image: "https://i.pravatar.cc/100?img=12" },
+      { id: "p2", name: "Luna", image: "https://i.pravatar.cc/100?img=13" },
+    ], // ✅ example pets
   },
 ];
 
 const Home = () => {
+  const { newPost } = useLocalSearchParams();
   const [post, setPost] = useState("");
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedPostImages, setSelectedPostImages] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>(
     {}
   );
@@ -84,16 +96,26 @@ const Home = () => {
     setTimeout(() => {
       setPosts(initialPosts);
       setLoading(false);
-    }, 2000);
+    }, 1500);
   };
 
   useEffect(() => {
-    // Simulate fetching
     setTimeout(() => {
-      setPosts(initialPosts);
+      setPosts((prev) => (prev.length === 0 ? initialPosts : prev));
       setLoading(false);
     }, 2000);
   }, []);
+
+  useEffect(() => {
+    if (newPost) {
+      try {
+        const parsed: Post = JSON.parse(newPost as string);
+        setPosts((prev) => [parsed, ...prev]);
+      } catch (e) {
+        console.error(" Invalid JSON newPost:", e, newPost);
+      }
+    }
+  }, [newPost]);
 
   const toggleLike = (id: string) => {
     setPosts((prev) =>
@@ -115,24 +137,6 @@ const Home = () => {
         p.id === id ? { ...p, showComments: !p.showComments } : p
       )
     );
-  };
-
-  const handlePost = () => {
-    if (!post.trim()) return;
-    const newPost: Post = {
-      id: Date.now().toString(),
-      user: "You",
-      profileImage: myProfileImage,
-      time: "Just now",
-      content: post,
-      images: [],
-      liked: false,
-      likesCount: 0,
-      comments: [],
-      showComments: false,
-    };
-    setPosts([newPost, ...posts]);
-    setPost("");
   };
 
   const addComment = (postId: string) => {
@@ -161,109 +165,145 @@ const Home = () => {
     setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
   };
 
-  const renderPost = ({ item }: { item: Post }) => (
-    <View style={styles.postCard}>
-      {/* Header row */}
-      <View style={styles.postHeader}>
-        {item.profileImage ? (
-          <Image
-            source={{ uri: item.profileImage }}
-            style={styles.profileImage}
-          />
-        ) : (
-          <View style={styles.profileImage} />
-        )}
-        <View style={{ marginLeft: 8 }}>
-          <Text style={styles.userName}>{item.user}</Text>
-          <Text style={styles.postTime}>{item.time}</Text>
-        </View>
-      </View>
+  const renderPost = ({ item }: { item: Post }) => {
+    const maxImagesToShow = 3;
+    const extraImages = item.images.length - maxImagesToShow;
 
-      {/* Post content */}
-      <Text style={styles.postContent}>{item.content}</Text>
-
-      {/* Images */}
-      {item.images.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginVertical: 10 }}
-        >
-          {item.images.map((img, idx) => (
+    return (
+      <View style={styles.postCard}>
+        {/* Header */}
+        <View style={styles.postHeader}>
+          {item.profileImage ? (
             <Image
-              key={idx}
-              source={{ uri: img }}
-              style={styles.postImage}
-              resizeMode="cover"
+              source={{ uri: item.profileImage }}
+              style={styles.profileImage}
             />
-          ))}
-        </ScrollView>
-      )}
-
-      {/* Actions */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity
-          onPress={() => toggleLike(item.id)}
-          style={styles.actionBtn}
-        >
-          <Ionicons
-            name={item.liked ? "heart-sharp" : "heart-outline"}
-            size={23}
-            color={item.liked ? "red" : "black"}
-          />
-          <Text style={styles.countText}>{item.likesCount}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => toggleComments(item.id)}
-          style={styles.actionBtn}
-        >
-          <Ionicons name="chatbubble-outline" size={20} color="black" />
-          <Text style={styles.countText}>{item.comments.length}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Comments */}
-      {item.showComments && (
-        <View style={styles.commentSection}>
-          {item.comments.map((c) => (
-            <View key={c.id} style={styles.commentRow}>
-              {c.profileImage ? (
-                <Image
-                  source={{ uri: c.profileImage }}
-                  style={styles.commentProfile}
-                />
-              ) : (
-                <View style={styles.commentProfile} />
-              )}
-              <View style={styles.commentBubble}>
-                <Text style={styles.commentUser}>{c.user}</Text>
-                <Text style={styles.commentText}>{c.text}</Text>
-              </View>
-            </View>
-          ))}
-
-          {/* Add comment input */}
-          <View style={styles.addCommentRow}>
-            <Image
-              source={{ uri: myProfileImage }}
-              style={styles.commentProfile}
-            />
-            <TextInput
-              placeholder="Write a comment..."
-              style={styles.commentInput}
-              value={commentInputs[item.id] || ""}
-              onChangeText={(text) =>
-                setCommentInputs((prev) => ({ ...prev, [item.id]: text }))
-              }
-            />
-            <TouchableOpacity onPress={() => addComment(item.id)}>
-              <Text style={styles.postCommentBtn}>Post</Text>
-            </TouchableOpacity>
+          ) : (
+            <View style={styles.profileImage} />
+          )}
+          <View style={{ marginLeft: 8 }}>
+            <Text style={styles.userName}>{item.user}</Text>
+            <Text style={styles.postTime}>{item.time}</Text>
           </View>
         </View>
-      )}
-    </View>
-  );
+
+        {/* Content */}
+        <Text style={styles.postContent}>{item.content}</Text>
+
+        {/*  Tagged Pets */}
+        {item.taggedPets && item.taggedPets.length > 0 && (
+          <View style={styles.taggedPetsContainer}>
+            {item.taggedPets.map((pet) => (
+              <TouchableOpacity
+                key={pet.id}
+                style={styles.petChip}
+                onPress={() => console.log("Go to pet profile:", pet.name)}
+              >
+                {pet.image ? (
+                  <Image source={{ uri: pet.image }} style={styles.petAvatar} />
+                ) : (
+                  <View style={styles.petAvatar} />
+                )}
+                <Text style={styles.petName}>{pet.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Images Grid */}
+        {item.images.length > 0 && (
+          <View style={styles.imageGrid}>
+            {item.images.slice(0, maxImagesToShow).map((img, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.imageWrapper}
+                onPress={() => {
+                  setSelectedPostImages(item.images);
+                  setSelectedIndex(idx);
+                  setImageModalVisible(true);
+                }}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={{ uri: img }}
+                  style={styles.gridImage}
+                  resizeMode="cover"
+                />
+                {idx === maxImagesToShow - 1 && extraImages > 0 && (
+                  <View style={styles.overlay}>
+                    <Text style={styles.overlayText}>+{extraImages}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Actions */}
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            onPress={() => toggleLike(item.id)}
+            style={styles.actionBtn}
+          >
+            <Ionicons
+              name={item.liked ? "heart-sharp" : "heart-outline"}
+              size={23}
+              color={item.liked ? "red" : "black"}
+            />
+            <Text style={styles.countText}>{item.likesCount}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => toggleComments(item.id)}
+            style={styles.actionBtn}
+          >
+            <Ionicons name="chatbubble-outline" size={20} color="black" />
+            <Text style={styles.countText}>{item.comments.length}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Comments */}
+        {item.showComments && (
+          <View style={styles.commentSection}>
+            {item.comments.map((c) => (
+              <View key={c.id} style={styles.commentRow}>
+                {c.profileImage ? (
+                  <Image
+                    source={{ uri: c.profileImage }}
+                    style={styles.commentProfile}
+                  />
+                ) : (
+                  <View style={styles.commentProfile} />
+                )}
+                <View style={styles.commentBubble}>
+                  <Text style={styles.commentUser}>{c.user}</Text>
+                  <Text style={styles.commentText}>{c.text}</Text>
+                </View>
+              </View>
+            ))}
+
+            {/* Add comment */}
+            <View style={styles.addCommentRow}>
+              <Image
+                source={{ uri: myProfileImage }}
+                style={styles.commentProfile}
+              />
+              <TextInput
+                placeholder="Write a comment..."
+                style={styles.commentInput}
+                value={commentInputs[item.id] || ""}
+                onChangeText={(text) =>
+                  setCommentInputs((prev) => ({ ...prev, [item.id]: text }))
+                }
+              />
+              <TouchableOpacity onPress={() => addComment(item.id)}>
+                <Text style={styles.postCommentBtn}>Post</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={[screens.screen, { backgroundColor: Colors.background }]}>
@@ -272,7 +312,6 @@ const Home = () => {
           <Pressable onPress={() => router.push("/pet-owner/post")}>
             <FontAwesome name="plus-square-o" size={24} color="black" />
           </Pressable>
-
           <Pressable onPress={() => router.push("/pet-owner/notifications")}>
             <Feather name="bell" size={24} color="black" />
           </Pressable>
@@ -294,53 +333,26 @@ const Home = () => {
             style={styles.input}
           />
         </View>
-        {/* <View
-          style={{
-            flexDirection: "row",
-            gap: 15,
-            alignSelf: "flex-start",
-            alignItems: "center",
-            // justifyContent: "center",
-            marginLeft: 50,
-            marginTop: 10,
-            width: "100%",
-          }}
-        >
-          <FontAwesome name="image" size={17} color="#26BC00" />
-          <Octicons name="video" size={17} color="#E00101" />
-          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-            <Text style={{ color: Colors.white, textAlign: "center" }}>
-              Post
-            </Text>
-          </TouchableOpacity>
-        </View> */}
       </View>
 
-      {/* Post list */}
+      {/* Posts */}
       {loading ? (
         <FlatList
-          data={[1, 2, 3]} // 3 skeleton placeholders
+          data={[1, 2, 3]}
           keyExtractor={(item) => item.toString()}
           renderItem={() => <SkeletonPost />}
         />
       ) : (
         <FlatList
           data={posts}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderPost}
           contentContainerStyle={{ paddingBottom: 80, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
           onRefresh={onRefresh}
           ListEmptyComponent={() => (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                marginTop: 50,
-                flexDirection: "column",
-              }}
-            >
+            <View style={{ flex: 1, alignItems: "center", marginTop: 50 }}>
               <FontAwesome5 name="pager" size={20} color="gray" />
               <Text style={{ color: "gray", fontSize: 12 }}>
                 No posts yet. Be the first to share something!
@@ -348,6 +360,41 @@ const Home = () => {
             </View>
           )}
         />
+      )}
+
+      {/* Modal viewer with swipe */}
+      {imageModalVisible && (
+        <Modal visible={imageModalVisible} transparent={true}>
+          <View style={styles.modalBackground}>
+            <FlatList
+              data={selectedPostImages}
+              horizontal
+              pagingEnabled
+              initialScrollIndex={selectedIndex}
+              getItemLayout={(_, index) => ({
+                length: Dimensions.get("window").width,
+                offset: Dimensions.get("window").width * index,
+                index,
+              })}
+              keyExtractor={(uri, i) => i.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.fullImageWrapper}>
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.fullImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setImageModalVisible(false)}
+            >
+              <Text style={styles.closeText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       )}
     </View>
   );
@@ -382,18 +429,9 @@ const styles = StyleSheet.create({
     width: "85%",
     paddingVertical: 4,
   },
-  postButton: {
-    backgroundColor: Colors.primary,
-    padding: 5,
-    borderRadius: 15,
-    width: "25%",
-    position: "absolute",
-    right: 0,
-    marginRight: 50,
-  },
   postCard: {
     backgroundColor: Colors.white,
-    marginTop: 10,
+    marginTop: 5,
     padding: 10,
     borderRadius: 10,
     width: "95%",
@@ -415,13 +453,6 @@ const styles = StyleSheet.create({
   postContent: {
     marginVertical: 5,
     fontSize: 14,
-  },
-  postImage: {
-    width: 200,
-    height: 150,
-    borderRadius: 8,
-    marginRight: 10,
-    backgroundColor: "#d9d9d9",
   },
   actionsRow: {
     flexDirection: "row",
@@ -488,5 +519,89 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: "600",
     marginLeft: 5,
+  },
+  // ✅ NEW STYLES
+  imageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 5,
+    marginTop: 10,
+  },
+  imageWrapper: {
+    width: "32%",
+    aspectRatio: 1,
+    borderRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+  },
+  gridImage: {
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullImage: {
+    width: "90%",
+    height: "70%",
+    borderRadius: 12,
+  },
+  fullImageWrapper: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 20,
+    padding: 10,
+  },
+  closeText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  taggedPetsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 5,
+  },
+  petChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F1F1F1",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  petAvatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 6,
+    backgroundColor: "#ccc",
+  },
+  petName: {
+    fontSize: 12,
+    color: "#333",
   },
 });

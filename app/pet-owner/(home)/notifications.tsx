@@ -2,11 +2,12 @@ import { Colors } from "@/shared/colors/Colors";
 import HeaderWithActions from "@/shared/components/HeaderSet";
 import HeaderLayout from "@/shared/components/MainHeaderLayout";
 import NotificationSkeleton from "@/shared/components/NotificationSkeleton";
-import { screens } from "@/shared/styles/styles";
+import { screens, ShadowStyle } from "@/shared/styles/styles";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  findNodeHandle,
   FlatList,
   Image,
   Pressable,
@@ -15,7 +16,6 @@ import {
   TouchableOpacity,
   UIManager,
   View,
-  findNodeHandle,
 } from "react-native";
 
 // Dummy notifications data
@@ -171,7 +171,7 @@ const Notifications = () => {
 
   return (
     <View style={[screens.screen, { backgroundColor: Colors.background }]}>
-      <HeaderLayout>
+      <HeaderLayout noBorderRadius>
         <HeaderWithActions
           title="Notifications"
           onBack={() => router.back()}
@@ -191,7 +191,11 @@ const Notifications = () => {
           data={latest}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            backgroundColor: "white",
+            marginTop: 5,
+          }}
           refreshing={refreshing}
           onRefresh={onRefresh}
           ListEmptyComponent={() => (
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     backgroundColor: "white",
     borderRadius: 6,
-    elevation: 5,
+    ...ShadowStyle,
     paddingVertical: 5,
     minWidth: 120,
     zIndex: 1000,

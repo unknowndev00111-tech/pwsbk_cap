@@ -1,7 +1,7 @@
 import { Colors } from "@/shared/colors/Colors";
 import HeaderWithActions from "@/shared/components/HeaderSet";
 import HeaderLayout from "@/shared/components/MainHeaderLayout";
-import { screens } from "@/shared/styles/styles";
+import { screens, ShadowStyle } from "@/shared/styles/styles";
 import { Entypo } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -81,10 +81,10 @@ const Search = () => {
 
   return (
     <View style={[screens.screen, { backgroundColor: Colors.background }]}>
-      <HeaderLayout>
+      <HeaderLayout noBorderRadius>
         <HeaderWithActions onBack={() => router.back()}>
           <TextInput
-            placeholder="Search"
+            placeholder="Search Pawsbook"
             value={search}
             onChangeText={setSearch}
             style={styles.input}
@@ -97,7 +97,11 @@ const Search = () => {
         data={recentSearches}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingVertical: 10 }}
+        contentContainerStyle={{
+          paddingVertical: 10,
+          backgroundColor: "white",
+          marginTop: 12,
+        }}
         ListHeaderComponent={() => (
           <Text style={styles.recentTitle}>Recent Searches</Text>
         )}
@@ -183,11 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 5,
     paddingHorizontal: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    ...ShadowStyle,
     width: 120,
   },
   dropdownItem: {
