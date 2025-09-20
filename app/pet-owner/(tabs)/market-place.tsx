@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -19,6 +20,8 @@ const marketPlace = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filterVisible, setFilterVisible] = useState(false);
 
   const onRefresh = () => {
     setLoading(true);
@@ -34,6 +37,9 @@ const marketPlace = () => {
     }, 2000);
   }, []);
 
+  // Categories
+  const categories = ["Dogs", "Cats", "Food", "Accessories"];
+
   // Sample market place items
   const marketItems = [
     {
@@ -42,6 +48,7 @@ const marketPlace = () => {
       price: 12000,
       description: "Healthy 2-month-old Golden Retriever. Vaccinated.",
       image: "https://placedog.net/400/300?id=1",
+      category: "Dogs",
     },
     {
       id: "2",
@@ -49,6 +56,7 @@ const marketPlace = () => {
       price: 1500,
       description: "Durable scratching post for cats. 3ft tall.",
       image: "https://placekitten.com/400/300",
+      category: "Accessories",
     },
     {
       id: "3",
@@ -56,17 +64,45 @@ const marketPlace = () => {
       price: 899,
       description: "10kg premium dry dog food.",
       image: "https://picsum.photos/400/300?random=10",
+      category: "Food",
+    },
+    {
+      id: "4",
+      name: "Persian Cat",
+      price: 8000,
+      description: "Pure breed Persian cat, 5 months old.",
+      image: "https://placekitten.com/400/301",
+      category: "Cats",
     },
   ];
 
+  // Filtered items by search + category
   const filteredItems = marketItems.filter(
     (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.description.toLowerCase().includes(search.toLowerCase())
+      (selectedCategory ? item.category === selectedCategory : true) &&
+      (item.name.toLowerCase().includes(search.toLowerCase()) ||
+        item.description.toLowerCase().includes(search.toLowerCase()))
   );
 
   const renderItem = ({ item }: { item: (typeof marketItems)[0] }) => (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={() =>
+        router.push({
+          pathname: "/pet-owner/item-details",
+          params: {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            description: item.description,
+            image: item.image,
+            location: "Manila, Philippines",
+            seller: "John Doe",
+            sellerImage: "https://randomuser.me/api/portraits/men/32.jpg",
+          },
+        })
+      }
+    >
       <Image source={{ uri: item.image }} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.itemName} numberOfLines={1}>
@@ -77,7 +113,7 @@ const marketPlace = () => {
           {item.description}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 
   return (
@@ -108,15 +144,15 @@ const marketPlace = () => {
             style={styles.input}
           />
         </View>
-        <View style={styles.filter}>
+        <Pressable style={styles.filter} onPress={() => setFilterVisible(true)}>
           <Octicons name="filter" size={24} color="black" />
-        </View>
+        </Pressable>
       </View>
 
-      {/*  List with skeleton */}
+      {/* List with skeleton */}
       {loading ? (
         <FlatList
-          data={[1, 2, 3, 4]}
+          data={[1, 2, 3, 4, 5, 6]}
           renderItem={() => <SkeletonMarketCard />}
           keyExtractor={(item) => item.toString()}
           numColumns={2}
@@ -146,6 +182,49 @@ const marketPlace = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFilterVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Category</Text>
+            {categories.map((cat) => (
+              <Pressable
+                key={cat}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === cat && styles.categorySelected,
+                ]}
+                onPress={() => {
+                  setSelectedCategory(cat === selectedCategory ? null : cat);
+                  setFilterVisible(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === cat && styles.categoryTextSelected,
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </Pressable>
+            ))}
+
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setFilterVisible(false)}
+            >
+              <Text style={styles.closeText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -241,5 +320,54 @@ const styles = StyleSheet.create({
     fontFamily: "RobotoSemiBold",
     color: Colors.primary,
     marginTop: 5,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "RobotoSemiBold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  categoryButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+    marginBottom: 10,
+  },
+  categorySelected: {
+    backgroundColor: Colors.primary,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontFamily: "Roboto",
+    color: "#000",
+    textAlign: "center",
+  },
+  categoryTextSelected: {
+    color: "#fff",
+    fontFamily: "RobotoSemiBold",
+  },
+  closeButton: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.gray,
+  },
+  closeText: {
+    textAlign: "center",
+    color: "#fff",
+    fontFamily: "RobotoSemiBold",
   },
 });

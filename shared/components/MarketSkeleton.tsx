@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
     overflow: "hidden",
-    width: "48%", // ✅ Matches grid layout
+    width: "48%",
     alignSelf: "flex-start",
   },
   imageBox: {
