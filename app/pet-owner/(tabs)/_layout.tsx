@@ -19,8 +19,8 @@ export default function TabLayout() {
     <Image
       source={focused ? activeIcon : inactiveIcon}
       style={{
-        width: 30,
-        height: 30,
+        width: 25,
+        height: 25,
         tintColor: focused ? Colors.primary : "#C3C0C0", // 👈 active/inactive colors
         marginTop: 10,
       }}
@@ -103,8 +103,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) =>
             renderIcon(
               focused,
-              require("../../../assets/Icons/profile-fill.png"),
-              require("../../../assets/Icons/profile-outline.png")
+              require("../../../assets/Icons/menu-fill.png"),
+              require("../../../assets/Icons/menu-outline.png")
             ),
         }}
       />
