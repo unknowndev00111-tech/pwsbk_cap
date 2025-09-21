@@ -97,7 +97,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="menu"
         options={{
           title: "Profile",
           tabBarIcon: ({ focused }) =>

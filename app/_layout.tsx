@@ -42,7 +42,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appReady) {
-      router.replace("/pet-owner/(tabs)/chat"); // replace so user can't go back to splash
+      router.replace("/pet-owner/(tabs)/menu"); // replace so user can't go back to splash
     }
   }, [appReady]);
 
