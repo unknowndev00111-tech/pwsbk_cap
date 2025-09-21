@@ -29,8 +29,8 @@ export const ButtonStyle = {
 
 export const HeaderTitleStyle = StyleSheet.create({
   title: {
-    fontSize: 20,
-    fontFamily: "RobotoSemiBold",
+    fontSize: 16,
+    fontFamily: "RobotoMedium",
     color: "black",
   },
 });

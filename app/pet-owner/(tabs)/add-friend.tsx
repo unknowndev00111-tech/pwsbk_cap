@@ -95,7 +95,7 @@ const addFriend = () => {
   );
 
   return (
-    <View style={[screens.screen, { backgroundColor: Colors.background }]}>
+    <View style={screens.screen}>
       {/* Header */}
       <HeaderLayout withLogo noBorderRadius height={130}>
         <Text style={styles.title}>Friends</Text>
@@ -113,12 +113,18 @@ const addFriend = () => {
           marginBottom: 10,
         }}
       >
-        <View style={styles.suggestions}>
+        <Pressable
+          style={styles.suggestions}
+          onPress={() => router.push("/pet-owner/suggestions")}
+        >
           <Text style={styles.text}>Suggestions</Text>
-        </View>
-        <View style={styles.yourfriend}>
+        </Pressable>
+        <Pressable
+          style={styles.yourfriend}
+          onPress={() => router.push("/pet-owner/my-friends")}
+        >
           <Text style={styles.text}>Your Friends</Text>
-        </View>
+        </Pressable>
       </View>
 
       <Text

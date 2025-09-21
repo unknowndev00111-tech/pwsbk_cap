@@ -42,7 +42,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appReady) {
-      router.replace("/pet-owner/(tabs)/add-friend"); // replace so user can't go back to splash
+      router.replace("/pet-owner/(tabs)/chat"); // replace so user can't go back to splash
     }
   }, [appReady]);
 
@@ -64,6 +64,7 @@ function NavigationRoot() {
       <Stack.Screen name="pet-owner/(tabs)" />
       <Stack.Screen name="pet-owner/(home)" />
       <Stack.Screen name="pet-owner/(market)" />
+      <Stack.Screen name="pet-owner/(friends)" />
       <Stack.Screen name="usable" />
 
       <Stack.Screen name="auth" options={{ headerShown: false }} />

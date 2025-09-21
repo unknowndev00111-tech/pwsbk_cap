@@ -25,7 +25,7 @@ const HeaderWithActions: React.FC<HeaderWithActionsProps> = ({
       <View style={styles.leftRow}>
         {onBack && (
           <Pressable onPress={onBack} style={{ marginRight: 5 }}>
-            <MaterialIcons name="arrow-back-ios" size={24} color="black" />
+            <MaterialIcons name="arrow-back-ios" size={20} color="black" />
           </Pressable>
         )}
 
